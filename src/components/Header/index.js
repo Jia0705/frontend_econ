@@ -1,4 +1,3 @@
-import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -25,7 +24,7 @@ function Header() {
               textTransform: "none",
               "&:hover": { backgroundColor: "#388e3c" },
             }}
-            onClick={() => navigate("/add-product")}
+            onClick={() => navigate("/")}
           >
             Add New
           </Button>

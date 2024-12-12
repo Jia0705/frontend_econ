@@ -5,24 +5,32 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Container from "@mui/material/Container";
 import Header from "../../components/Header";
-import TableList from "../../components/TableList"; 
+import TableList from "../../components/TableList";
 import { getProducts, getCategories } from "../../utils/api";
 
 export default function ProductPage() {
-  const [category, setCategory] = useState(""); 
+  const [category, setCategory] = useState("");
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]); 
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    getCategories().then((data) => {
-      setCategories(data);
-    });
+    getCategories()
+      .then((data) => {
+        setCategories((data) ? data : []);
+      })
+      .catch(() => {
+        setCategories([]);
+      });
   }, []);
 
   useEffect(() => {
-    getProducts(category).then((data) => {
-      setProducts(data);
-    });
+    getProducts(category)
+      .then((data) => {
+        setProducts((data) ? data : []);
+      })
+      .catch(() => {
+        setProducts([]);
+      });
   }, [category]);
 
   const handleChange = (event) => {
@@ -37,7 +45,7 @@ export default function ProductPage() {
           style={{
             display: "flex",
             justifyContent: "flex-end",
-            padding: "15px 0",
+            padding: "15px",
           }}
         >
           <FormControl variant="filled" style={{ minWidth: 220 }}>
@@ -52,8 +60,8 @@ export default function ProductPage() {
                 <em>All Categories</em>
               </MenuItem>
               {categories.length > 0 ? (
-                categories.map((item, index) => (
-                  <MenuItem key={index} value={item}>
+                categories.map((item) => (
+                  <MenuItem value={item}>
                     {item}
                   </MenuItem>
                 ))
@@ -63,9 +71,8 @@ export default function ProductPage() {
             </Select>
           </FormControl>
         </div>
-
         {products.length > 0 ? (
-          <TableList products={products} />
+          <TableList list={products} />
         ) : (
           <p>No products available for this category.</p>
         )}
