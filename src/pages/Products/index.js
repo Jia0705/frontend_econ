@@ -60,7 +60,6 @@ function Products() {
       cart = [];
     }
 
-    // Check if the product already exists in the cart
     const products = cart.findIndex(
       (item) => item._id === product._id
     );
@@ -71,7 +70,6 @@ function Products() {
       cart.push({ ...product, quantity: 1 });
     }
 
-    // Save the cart back to localStorage
     localStorage.setItem("cart", JSON.stringify(cart));
     toast.success("Product Added To Cart");
   };
