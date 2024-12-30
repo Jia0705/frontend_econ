@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Container, Button, Typography, Box } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Card from "@mui/material/Card";
@@ -13,8 +13,10 @@ import { toast } from "sonner";
 import { getProducts } from "../../utils/api_products";
 import { getCategories } from "../../utils/api_categories";
 import { deleteProduct } from "../../utils/api_products";
+import { AddToCart } from "../../utils/api_cart";
 
 function Products() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -31,6 +33,12 @@ function Products() {
       setCategories(data);
     });
   }, []);
+
+  const handleAddToCart = (product) => {
+    // trigger add to cart function
+    AddToCart(product);
+    toast.success(`${product.name} has been added to Cart`);
+  };
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
@@ -49,29 +57,6 @@ function Products() {
         toast.error("Failed to delete product");
       }
     }
-  };
-
-  const handleAddToCart = (product) => {
-    // Load items from localStorage
-    const stringItems = localStorage.getItem("cart");
-    // Turn string to array
-    let cart = JSON.parse(stringItems);
-    if (!cart) {
-      cart = [];
-    }
-
-    const products = cart.findIndex(
-      (item) => item._id === product._id
-    );
-
-    if (products !== -1) {
-      cart[products].quantity += 1;
-    } else {
-      cart.push({ ...product, quantity: 1 });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-    toast.success("Product Added To Cart");
   };
 
   return (
@@ -161,11 +146,12 @@ function Products() {
                       textTransform: "none",
                       "&:hover": { backgroundColor: "#115293" },
                     }}
-                    onClick={() => handleAddToCart(product)}
+                    onClick={() => {
+                      handleAddToCart(product);
+                    }}
                   >
                     Add to Cart
                   </Button>
-
                   <Box
                     display={"flex"}
                     justifyContent={"space-between"}
