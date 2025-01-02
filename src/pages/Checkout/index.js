@@ -12,8 +12,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import Header from "../../components/Header";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";

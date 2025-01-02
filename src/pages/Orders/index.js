@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Table,
@@ -13,49 +13,42 @@ import {
   MenuItem,
   FormControl,
 } from "@mui/material";
-import { getOrders, updateOrder, deleteOrder } from "../../utils/api_orders";
+import Header from "../../components/Header";
 import { toast } from "sonner";
+import { getOrders, updateOrder, deleteOrder } from "../../utils/api_orders";
 
-const Orders = () => {
+function Orders() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    const oOrders = async () => {
-      const data = await getOrders();
+    getOrders().then((data) => {
       setOrders(data);
-    };
-
-    oOrders();
+    });
   }, []);
 
-  const handleDelete = async (_id) => {
-    const confirmed = window.confirm("Are you sure you want to delete this order?");
-    if (confirmed) {
-      const deleted = await deleteOrder(_id);
-      if (deleted) {
-        const latestOrders = await getOrders();
-        setOrders(latestOrders);
-        toast.success("Order deleted successfully");
-      } else {
-        toast.error("Failed to delete order");
-      }
+  const handleStatusUpdate = async (_id, status) => {
+    const updatedOrder = await updateOrder(_id, status);
+    if (updatedOrder) {
+      // fetch the updated orders from API
+      const updatedOrders = await getOrders();
+      setOrders(updatedOrders);
+      toast.success("Order status has been updated");
     }
   };
 
-  const handleStatus = async (_id, newStatus) => {
-    const updatedOrder = await updateOrder(_id, { status: newStatus });
-    if (updatedOrder) {
-      const latestOrders = await getOrders();
-      setOrders(latestOrders);
-      toast.success("Order status updated successfully");
-    } else {
-      toast.error("Failed to update order status");
+  const handleOrderDelete = async (_id) => {
+    const response = await deleteOrder(_id);
+    if (response && response.status === "success") {
+      // fetch the updated orders from API
+      const updatedOrders = await getOrders();
+      setOrders(updatedOrders);
+      toast.success("Order has been deleted");
     }
   };
 
   return (
     <Container>
-      <h2>Orders</h2>
+      <Header title="My Orders" />
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="orders table">
           <TableHead>
@@ -78,36 +71,47 @@ const Orders = () => {
                     <small>{order.customerEmail}</small>
                   </TableCell>
                   <TableCell>
-                    {order.products.map((product) => product.name).join(", ")}
+                    {order.products.map((product) => (
+                      <div key={product._id}>{product.name}</div>
+                    ))}
                   </TableCell>
                   <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
                   <TableCell>
                     <FormControl fullWidth>
-                      <Select
-                        value={order.status}
-                        onChange={(event) =>
-                          handleStatus(order._id, event.target.value)
-                        }
-                      >
-                        <MenuItem value="pending">Pending</MenuItem>
-                        <MenuItem value="paid">Paid</MenuItem>
-                        <MenuItem value="failed">Failed</MenuItem>
-                        <MenuItem value="completed">Completed</MenuItem>
-                      </Select>
+                      {order.status === "pending" ? (
+                        <Select value={order.status} disabled={true}>
+                          <MenuItem value="pending">Pending</MenuItem>
+                        </Select>
+                      ) : (
+                        <Select
+                          value={order.status}
+                          onChange={(event) => {
+                            handleStatusUpdate(order._id, event.target.value);
+                          }}
+                        >
+                          <MenuItem value="paid">Paid</MenuItem>
+                          <MenuItem value="failed">Failed</MenuItem>
+                          <MenuItem value="completed">Completed</MenuItem>
+                        </Select>
+                      )}
                     </FormControl>
                   </TableCell>
                   <TableCell>
-                    {order.paid_at ? (order.paid_at) : "Not Paid"}
+                    {order.paid_at ? order.paid_at : "Not Paid"}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      disabled={order.status !== "pending"}
-                      onClick={() => handleDelete(order._id)}
-                    >
-                      Delete
-                    </Button>
+                    {order.status === "pending" ? (
+                      <Button
+                        variant="contained"
+                        color="error"
+                        disabled={order.status !== "pending"}
+                        onClick={() => {
+                          handleOrderDelete(order._id);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               ))
@@ -123,6 +127,6 @@ const Orders = () => {
       </TableContainer>
     </Container>
   );
-};
+}
 
 export default Orders;
