@@ -3,6 +3,7 @@ import { toast } from "sonner";
 
 import { API_URL } from "../constants";
 
+// public API
 export const verifyPayment = async (
   billplz_id,
   billplz_paid,

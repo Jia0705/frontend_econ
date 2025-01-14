@@ -65,7 +65,7 @@ export function getTotalCartPrice() {
   return total.toFixed(2);
 }
 
-// clear cart
-export function clearCart(){
+// clear the cart
+export function clearCart() {
   localStorage.removeItem("cart");
 }

@@ -1,79 +1,76 @@
 import { useState } from "react";
-import {
-  Container,
-  TextField,
-  Box,
-  Button,
-  Card,
-  CardContent,
-} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Container, Typography, Box, TextField, Button } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
 import Header from "../../components/Header";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { login } from "../../utils/api_auth";
+import { useCookies } from "react-cookie";
 
 function Login() {
+  const navigate = useNavigate();
+  const [cookies, setCookie] = useCookies(["currentUser"]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [submit, setSubmit] = useState(false);
-  const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    if (email === "" || password === "") {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    setSubmit(true);
-
-    try {
-      const user = await login(email, password);
-
-      if (user) {
-        console.log(user);
-        toast.success("Login Successful");
-        navigate("/"); 
-      }
-    } catch (error) {
-        toast.error("Login failed.");
+  const handleFormSubmit = async () => {
+    // check for error
+    if (!email || !password) {
+      toast.error("Please fill up all the fields");
+    } else {
+      // trigger the API
+      const userData = await login(email, password);
+      // set cookies
+      setCookie("currentUser", userData, {
+        maxAge: 60 * 60 * 24 * 30, // second * minutes * hours * days
+      });
+      // redirect user back to home
+      navigate("/");
+      toast.success("You have successfully login. Happy shopping!");
     }
   };
 
   return (
     <Container>
       <Header title="Login to Your Account" />
-      <Box maxWidth={400} mx="auto" mt={8}>
-        <Card elevation={3}>
+      <Container maxWidth="sm">
+        <Card elevation={5}>
           <CardContent>
-            <TextField
-              label="Email"
-              fullWidth
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              margin="normal"
-            />
-            <TextField
-              label="Password"
-              fullWidth
-              required
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              margin="normal"
-            />
+            <Typography variant="h4" align="center" mb={4}>
+              Login
+            </Typography>
+            <Box mb={2}>
+              <TextField
+                label="Email"
+                type="email"
+                required
+                fullWidth
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </Box>
+            <Box mb={2}>
+              <TextField
+                label="Password"
+                type="password"
+                required
+                fullWidth
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </Box>
             <Button
               variant="contained"
               color="primary"
               fullWidth
-              onClick={handleSubmit}
-              sx={{ mt: 2 }}
+              onClick={handleFormSubmit}
             >
-              Login
+              Submit
             </Button>
           </CardContent>
         </Card>
-      </Box>
+      </Container>
     </Container>
   );
 }

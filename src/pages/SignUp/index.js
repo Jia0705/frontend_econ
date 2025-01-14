@@ -1,101 +1,99 @@
 import { useState } from "react";
-import {
-  Container,
-  TextField,
-  Box,
-  Button,
-  Card,
-  CardContent,
-} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Container, Typography, Box, TextField, Button } from "@mui/material";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
 import Header from "../../components/Header";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { signup } from "../../utils/api_auth";
+import { useCookies } from "react-cookie";
 
 function SignUp() {
+  const navigate = useNavigate();
+  const [cookies, setCookie] = useCookies(["currentUser"]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [submit, setSubmit] = useState(false); 
-  const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    if (name === "" || email === "" || password === "" || confirmPassword === "") {
-      toast.error("Please fill in all fields");
-      return; 
-    } else if (password.length < 8) {
-      toast.error("Password must be at least 8 characters long");
-      return;
+  const handleFormSubmit = async () => {
+    // check for error
+    if (!name || !email || !password || !confirmPassword) {
+      toast.error("Please fill up all the fields");
     } else if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    setSubmit(true); 
-
-    try {
-      const user = await signup(name, email, password);
-      console.log(user);
-      toast.success("Signup Successful");
-      navigate("/login"); 
-    } catch (error) {
-        toast.error("Signup failed. Please try again.");
+      toast.error("Your password does not match");
+    } else {
+      // trigger the API
+      const userData = await signup(name, email, password);
+      // set cookies
+      setCookie("currentUser", userData, {
+        maxAge: 60 * 60 * 24 * 30, // second * minutes * hours * days
+      });
+      // redirect user back to home
+      navigate("/");
+      toast.success("You have successfully signed up. Happy shopping!");
     }
   };
 
   return (
     <Container>
-      <Header title="Create a New Account" />
-      <Box maxWidth={400} mx="auto" mt={8} px={3}>
-        <Card elevation={3}>
+      <Header title = "Create a New Account" />
+      <Container maxWidth="sm">
+        <Card elevation={5}>
           <CardContent>
-            <TextField
-              label="Name"
-              fullWidth
-              required
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              margin="normal"
-            />
-            <TextField
-              label="Email"
-              fullWidth
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              margin="normal"
-            />
-            <TextField
-              label="Password"
-              fullWidth
-              required
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              margin="normal"
-            />
-            <TextField
-              label="Confirm Password"
-              fullWidth
-              required
-              type="password"
-              value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
-              margin="normal"
-            />
+            <Typography variant="h4" align="center" mb={4}>
+              Sign Up
+            </Typography>
+            <Box mb={2}>
+              <TextField
+                label="Name"
+                required
+                fullWidth
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
+            </Box>
+            <Box mb={2}>
+              <TextField
+                label="Email"
+                type="email"
+                required
+                fullWidth
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </Box>
+            <Box mb={2}>
+              <TextField
+                label="Password"
+                type="password"
+                required
+                fullWidth
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </Box>
+            <Box mb={2}>
+              <TextField
+                label="Confirm Password"
+                type="password"
+                required
+                fullWidth
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+              />
+            </Box>
             <Button
               variant="contained"
               color="primary"
               fullWidth
-              onClick={handleSubmit}
-              sx={{ mt: 2 }}
+              onClick={handleFormSubmit}
             >
-              Sign Up
+              Submit
             </Button>
           </CardContent>
         </Card>
-      </Box>
+      </Container>
     </Container>
   );
 }
