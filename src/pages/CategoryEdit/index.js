@@ -55,7 +55,8 @@ function CategoryEdit() {
                 required
                 fullWidth
                 value={name}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event) => 
+                  setName(event.target.value)}
               />
             </Box>
             <Button
